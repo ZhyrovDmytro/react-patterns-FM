@@ -16,37 +16,29 @@ class Toggle extends React.Component {
   state = this.initialState
   internalSetState(changes, callback) {
     this.setState(state => {
-      // handle function setState call
       const changesObject =
         typeof changes === 'function' ? changes(state) : changes
-      // apply state reducer
       const reducedChanges =
-        this.props.stateReducer(state, changesObject) || {}
-      // 🐨  in addition to what we've done, let's pluck off the `type`
-      // property and return an object only of the state changes
-      // 💰 to remove the `type`, you can destructure the changes:
-      // `{type, ...c}`
-      return Object.keys(reducedChanges).length
-        ? reducedChanges
+        this.props.stateReducer(state, changesObject) || {};
+
+      const {type, ...remainingChanges } = reducedChanges;
+
+      return Object.keys(remainingChanges).length
+        ? remainingChanges
         : null
     }, callback)
   }
   reset = () =>
-    // 🐨 add a `type` string property to this call
-    this.internalSetState(this.initialState, () =>
+    this.internalSetState({type: 'reset', ...this.initialState},() =>
       this.props.onReset(this.state.on),
     )
-  // 🐨 accept a `type` property here and give it a default value
-  toggle = () =>
+  toggle = ({type = 'toggle'} = {}) =>
     this.internalSetState(
-      // pass the `type` string to this object
-      ({on}) => ({on: !on}),
+      ({on}) => ({type, on: !on}),
       () => this.props.onToggle(this.state.on),
     )
   getTogglerProps = ({onClick, ...props} = {}) => ({
-    // 🐨 change `this.toggle` to `() => this.toggle()`
-    // to avoid passing the click event to this.toggle.
-    onClick: callAll(onClick, this.toggle),
+    onClick: callAll(onClick, () => this.toggle()),
     'aria-expanded': this.state.on,
     ...props,
   })
