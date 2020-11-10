@@ -6,7 +6,6 @@ import {Switch} from '../switch'
 const callAll = (...fns) => (...args) =>
   fns.forEach(fn => fn && fn(...args))
 
-const noop = () => {};
 class Toggle extends React.Component {
   static defaultProps = {
     initialOn: false,
